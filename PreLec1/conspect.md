@@ -77,3 +77,8 @@ sudo docker run hello-world
 ```
 
 * Выполним ```./installation.sh``` повторно
+
+
+## Шаг 2. Свяжем локальный репозиторий с удаленным на ***github.com***
+Внутри директории ```$GOPATH/src/github.com/<your-username-github-account>``` создадим директорию ```course```. Теперь свяжем эту директорию с удаленным ```github.com``` репозиторием . В итоге получилось ```$GOPATH/src/github.com/vlasove/course``` связана с удаленным репозиторием ```https://github.com/vlasove/SPCgo3```
+
