@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"text/template"
-
-	"github.com/asaskevich/govalidator"
-	"github.com/gorilla/schema"
 )
 
 const (
@@ -15,70 +14,46 @@ const (
 	connPort = "8080"
 )
 
-//User ...
-type User struct {
-	//Зададим ограничения на уровне структуры
-	Username string `valid:"alpha, required"`
-	Password string `valid:"alpha, required"`
-	Age      int
-	Phone    string
-	Link     string
-}
-
-//VaildateUser ...
-func ValidateUser(w http.ResponseWriter, r *http.Request, user *User) (bool, string) {
-	valid, validateError := govalidator.ValidateStruct(user)
-	if !valid {
-		usernameError := govalidator.ErrorByField(validateError, "Username")
-		passwordError := govalidator.ErrorByField(validateError, "Password")
-		if usernameError != "" {
-			log.Println("username validation error:", usernameError)
-			return valid, "Validation error with Username field"
-		}
-
-		if passwordError != "" {
-			log.Println("password validation error:", passwordError)
-			return valid, "Validation error with Password field"
-		}
-	}
-	return valid, "Validation Error"
-}
-
-//LoginPageHandler ....
-func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		parsedTemplate, _ := template.ParseFiles("templates/login.html")
-		err := parsedTemplate.Execute(w, nil)
-		if err != nil {
-			log.Println("error while executing template:", err)
-			return
-		}
-	} else {
-		user := ReadUserForm(r)
-		valid, validationError := ValidateUser(w, r, user)
-		if !valid {
-			fmt.Fprintf(w, validationError)
-			return
-		}
-		fmt.Fprintf(w, "Hello "+user.Username+" !!")
-	}
-
-}
-
-//ReadUserForm ...
-func ReadUserForm(r *http.Request) *User {
-	r.ParseForm()                           //Получить все данные из запроса, которые касаются форм запроса
-	user := new(User)                       //Пустышка пользователя
-	decoder := schema.NewDecoder()          // Стандартный декодер для форм
-	err := decoder.Decode(user, r.PostForm) // Перенесем в поинтер на User все, что было в теле POST запроса касаемо формы.
+//UploadPageFormHandler ...
+func UploadPageFormHandler(w http.ResponseWriter, r *http.Request) {
+	parsedTemplate, _ := template.ParseFiles("templates/upload.html")
+	err := parsedTemplate.Execute(w, nil)
 	if err != nil {
-		log.Println("error mapping user from Post form:", err)
+		log.Println("error parsing template:", err)
+		return
 	}
-	return user
+}
+
+//FileUploaderHandler ...
+func FileUploaderHandler(w http.ResponseWriter, r *http.Request) {
+	file, header, err := r.FormFile("file") //По умолчанию файл будет открыт
+	if err != nil {
+		log.Println("error getting a file from form:", err)
+		return
+	}
+	defer file.Close()
+
+	//Куда сохраним этот файл?
+	outFile, pathError := os.Create("uploadedFile")
+	if pathError != nil {
+		log.Println("error creating a file for writing:", pathError)
+		return
+	}
+	defer outFile.Close()
+
+	//Копируем все из входного файла в выходной
+	_, copyFileError := io.Copy(outFile, file)
+	if copyFileError != nil {
+		log.Println("error while copy file from to:", copyFileError)
+		return
+	}
+	fmt.Fprintf(w, "File uploaded successfully : "+header.Filename)
+
 }
 
 func main() {
-	http.HandleFunc("/login", LoginPageHandler)
+	http.HandleFunc("/", UploadPageFormHandler)
+	http.HandleFunc("/upload", FileUploaderHandler)
 	err := http.ListenAndServe(connHost+":"+connPort, nil)
 	if err != nil {
 		log.Fatal("error starting server:", err)
