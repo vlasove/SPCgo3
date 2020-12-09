@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/gorilla/schema"
 )
 
@@ -16,11 +17,31 @@ const (
 
 //User ...
 type User struct {
-	Username string
-	Password string
+	//Зададим ограничения на уровне структуры
+	Username string `valid:"alpha, required"`
+	Password string `valid:"alpha, required"`
 	Age      int
 	Phone    string
 	Link     string
+}
+
+//VaildateUser ...
+func ValidateUser(w http.ResponseWriter, r *http.Request, user *User) (bool, string) {
+	valid, validateError := govalidator.ValidateStruct(user)
+	if !valid {
+		usernameError := govalidator.ErrorByField(validateError, "Username")
+		passwordError := govalidator.ErrorByField(validateError, "Password")
+		if usernameError != "" {
+			log.Println("username validation error:", usernameError)
+			return valid, "Validation error with Username field"
+		}
+
+		if passwordError != "" {
+			log.Println("password validation error:", passwordError)
+			return valid, "Validation error with Password field"
+		}
+	}
+	return valid, "Validation Error"
 }
 
 //LoginPageHandler ....
@@ -34,6 +55,11 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		user := ReadUserForm(r)
+		valid, validationError := ValidateUser(w, r, user)
+		if !valid {
+			fmt.Fprintf(w, validationError)
+			return
+		}
 		fmt.Fprintf(w, "Hello "+user.Username+" !!")
 	}
 
