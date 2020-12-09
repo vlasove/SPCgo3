@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-
-	"github.com/gorilla/mux"
 )
 
 const (
@@ -21,37 +19,21 @@ type User struct {
 	Link     string
 }
 
-//HomePageHandler ...
-func HomePageHandler(w http.ResponseWriter, r *http.Request) {
-	user := User{
-		Username: "NewUser",
-		Age:      35,
-		Phone:    "+49 999 999 22 33",
-		Link:     "github.com/new_user/portfolio",
-	}
-	parserdTemplate, _ := template.ParseFiles("templates/home.html")
-	err := parserdTemplate.Execute(w, user)
+//LoginPageHandler ....
+func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
+	parsedTemplate, _ := template.ParseFiles("templates/login.html")
+	err := parsedTemplate.Execute(w, nil)
 	if err != nil {
-		log.Println("error while parsing template with user:", err)
+		log.Println("error while executing template:", err)
 		return
 	}
-
 }
 
 func main() {
-
-	//Реконфигурация static через мультиплексер
-	router := mux.NewRouter()
-
-	router.HandleFunc("/", HomePageHandler).Methods("GET")
-	//Поддержка самого файл-сервера
-	router.PathPrefix("/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
-
-	//Запуск сервера
-	err := http.ListenAndServe(connHost+":"+connPort, router)
+	http.HandleFunc("/login", LoginPageHandler)
+	err := http.ListenAndServe(connHost+":"+connPort, nil)
 	if err != nil {
 		log.Fatal("error starting server:", err)
 		return
 	}
-
 }
