@@ -73,4 +73,170 @@ func main() {
 Каким образом можно отобразить веб-формы на странице и каким образом она коннектится к ```go application```?
 Создадим форму логина : ```templates/login.html```:
 ```
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login Page</title>
+    </head>
+    <body> 
+        <form method="post" action="/login">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username">
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password">
+
+            <button type="submit">Login</button>
+        </form>
+
+    </body>
+</html>
+```
+***Важно*** , чтобы поле ```type="password"``` было указано в поле ввода пароля.
+
+Теперь пропишем лоигку в ```main.go``` файле:
+```
+package main
+
+import (
+	"log"
+	"net/http"
+	"text/template"
+)
+
+const (
+	connHost = "localhost"
+	connPort = "8080"
+)
+
+//User ...
+type User struct {
+	Username string
+	Age      int
+	Phone    string
+	Link     string
+}
+
+//LoginPageHandler ....
+func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
+	parsedTemplate, _ := template.ParseFiles("templates/login.html")
+	err := parsedTemplate.Execute(w, nil)
+	if err != nil {
+		log.Println("error while executing template:", err)
+		return
+	}
+}
+
+func main() {
+	http.HandleFunc("/login", LoginPageHandler)
+	err := http.ListenAndServe(connHost+":"+connPort, nil)
+	if err != nil {
+		log.Fatal("error starting server:", err)
+		return
+	}
+}
+
+```
+
+### Шаг 3. Чтение из формы.
+Для взаимодействия с формой воспользуемся пакетом ```go get github.com/gorilla/schema```. Поля ```Username```  и ```Password``` уже определены в структуре ```User```. Опишем функцию, по чтению данных из формы.
+```
+//ReadUserForm ...
+func ReadUserForm(r *http.Request) *User {
+	r.ParseForm()                           //Получить все данные из запроса, которые касаются форм запроса
+	user := new(User)                       //Пустышка пользователя
+	decoder := schema.NewDecoder()          // Стандартный декодер для форм
+	err := decoder.Decode(user, r.PostForm) // Перенесем в поинтер на User все, что было в теле POST запроса касаемо формы.
+	if err != nil {
+		log.Println("error mapping user from Post form:", err)
+	}
+	return user
+}
+
+```
+
+Теперь воспользуемся этой функцией:
+```
+//LoginPageHandler ....
+func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		parsedTemplate, _ := template.ParseFiles("templates/login.html")
+		err := parsedTemplate.Execute(w, nil)
+		if err != nil {
+			log.Println("error while executing template:", err)
+			return
+		}
+	} else {
+		user := ReadUserForm(r)
+		fmt.Fprintf(w, "Hello "+user.Username+" !!")
+	}
+
+}
+
+```
+
+Весь код ```main.go``` файла:
+```
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"text/template"
+
+	"github.com/gorilla/schema"
+)
+
+const (
+	connHost = "localhost"
+	connPort = "8080"
+)
+
+//User ...
+type User struct {
+	Username string
+	Password string
+	Age      int
+	Phone    string
+	Link     string
+}
+
+//LoginPageHandler ....
+func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		parsedTemplate, _ := template.ParseFiles("templates/login.html")
+		err := parsedTemplate.Execute(w, nil)
+		if err != nil {
+			log.Println("error while executing template:", err)
+			return
+		}
+	} else {
+		user := ReadUserForm(r)
+		fmt.Fprintf(w, "Hello "+user.Username+" !!")
+	}
+
+}
+
+//ReadUserForm ...
+func ReadUserForm(r *http.Request) *User {
+	r.ParseForm()                           //Получить все данные из запроса, которые касаются форм запроса
+	user := new(User)                       //Пустышка пользователя
+	decoder := schema.NewDecoder()          // Стандартный декодер для форм
+	err := decoder.Decode(user, r.PostForm) // Перенесем в поинтер на User все, что было в теле POST запроса касаемо формы.
+	if err != nil {
+		log.Println("error mapping user from Post form:", err)
+	}
+	return user
+}
+
+func main() {
+	http.HandleFunc("/login", LoginPageHandler)
+	err := http.ListenAndServe(connHost+":"+connPort, nil)
+	if err != nil {
+		log.Fatal("error starting server:", err)
+		return
+	}
+}
+
 ```
