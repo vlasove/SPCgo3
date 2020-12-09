@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -20,10 +21,35 @@ func init() {
 }
 
 //Блок создания cookie
-func createCookie(w http.ResponseWriter, r *http.Request) {}
+func createCookie(w http.ResponseWriter, r *http.Request) {
+	value := map[string]string{"username": "Alex"}
+	//Для передачи данных через cookie необходимо сериализовать
+	base64Encoded, err := cookieHandler.Encode("key", value)
+	if err == nil {
+		cookie := &http.Cookie{
+			Name:  "first-cookie",
+			Value: base64Encoded,
+			Path:  "/",
+		}
+		http.SetCookie(w, cookie)
+	}
+	w.Write([]byte("Cookie created!"))
+}
 
 //Блок чтения cookie
-func readCookie(w http.ResponseWriter, r *http.Request) {}
+func readCookie(w http.ResponseWriter, r *http.Request) {
+	log.Println("Now reading cookie proces....")
+	cookie, err := r.Cookie("first-cookie")
+	if cookie != nil && err == nil {
+		value := make(map[string]string)
+		if err = cookieHandler.Decode("key", cookie.Value, &value); err == nil {
+			w.Write([]byte(fmt.Sprintf("Hello, %v !\n", value["username"])))
+		}
+	} else {
+		log.Println("Cookie not found in this request....")
+		w.Write([]byte("Hello !"))
+	}
+}
 
 func main() {
 	http.HandleFunc("/create", createCookie)
