@@ -47,7 +47,7 @@ parsedTemplate.Execute(w, data)
     {{range .Books}} <!--Вызываем поле Books переданного объекта-->
         <li>
             <b>{{.Title}}</b>
-            <p>{{. PageCount}}</p>
+            <p>{{ .PageCount}}</p>
             <p>{{ .Author}}</p>
         </li>
         
