@@ -99,3 +99,6 @@ module.exports =
 ### Шаг 5. Сборка билда
 * npm install
 * npm run build 
+
+### Шаг 6. Запуск собранного проекта
+* ```go run server.go```
