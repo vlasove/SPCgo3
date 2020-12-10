@@ -95,3 +95,7 @@ module.exports =
 * ```app/components/employee.jsx```
 * ```app/components/employee-list.jsx```
 * ```app/components/add-employee.jsx```
+
+### Шаг 5. Сборка билда
+* npm install
+* npm run build 
