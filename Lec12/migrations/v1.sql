@@ -1,0 +1,6 @@
+use mydb;
+
+CREATE TABLE IF NOT EXISTS employee
+(uid INT(10) NOT NULL AUTO_INCREMENT, name VARCHAR(100) NULL DEFAULT NULL, PRIMARY KEY (uid));
+
+commit;
