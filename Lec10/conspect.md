@@ -72,6 +72,12 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 
 В ```main.go``` добавим новый ```Route```:
 ```
+Route{
+		"DeleteEmployee",
+		"DELETE",
+		"/employee/delete",
+		handlers.DeleteEmployee,
+	},
 ```
 Должно получиться следующее:
 * ```curl -H "Content-Type: application/json" -X DELETE -d '{"Id" : "1", "firstName" : "Bob", "lastName" : "Jack"}' http://localhost:8080/employee/delete``` -> ```employee with that ID successfully deleted```

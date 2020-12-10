@@ -81,5 +81,7 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteEmployee(w http.ResponseWriter, r *http.Request) {
-
+	//Удаляем по Id из тела запроса.
 }
+
+// sudo apt install npm
