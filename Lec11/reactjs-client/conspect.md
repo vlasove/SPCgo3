@@ -55,5 +55,43 @@
 ### Шаг 3. Инициализация сборщика проекта
 В качестве сборщика проекта используется ```webpack```. Для его описания создадим файл ```webpack.config.js```:
 ```
-
+var path = require('path');
+module.exports = 
+{
+    resolve:
+    {
+        extensions: ['.js', '.jsx']
+    },
+    mode: 'development',
+    entry: '/.app/main.js',
+    cache: true,
+    output:
+    {
+        path: __dirname,
+        filename: './assets/script.js'
+    },
+    module:
+    {
+        rules:
+        [
+            {
+                test: path.join(__dirname, '.'),
+                exclude: /(node_modules)/,
+                loader : 'babel-loader',
+                query:
+                {
+                    cacheDirectory: true,
+                    presets: ['es2015', 'react']
+                }
+            }
+        ]
+    }
+};
 ```
+
+### Шаг 4. Сборка ReactApp и необходимые компоненты
+* Создадим файлы ```app/components/react-app.jsx```
+* ```app/components/employee-app.jxs```
+* ```app/components/employee.jsx```
+* ```app/components/employee-list.jsx```
+* ```app/components/add-employee.jsx```
