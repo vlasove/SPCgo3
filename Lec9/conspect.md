@@ -215,3 +215,50 @@ func main() {
 	}
 }
 ```
+
+### Шаг 2. Простейший POST запрос
+Изменим описание переменной ```routes```:
+```
+var routes = Routes{
+	Route{
+		"getEmployees",
+		"GET",
+		"/employees",
+		getEmployees,
+	},
+	Route{
+		"getEmployee",
+		"GET",
+		"/employee/{id}",
+		getEmployee,
+	},
+	Route{
+		"addEmployee",
+		"POST",
+		"/employee/add",
+		addEmployee,
+	},
+}
+```
+
+
+Определим функцию ```addEmployee```:
+```
+func addEmployee(w http.ResponseWriter, r *http.Request) {
+	employee := Employee{}
+	err := json.NewDecoder(r.Body).Decode(&employee)
+	if err != nil {
+		log.Println("error while parsing POST-body:", err)
+		return
+	}
+	log.Println("POST body successeded parsing")
+	employees = append(employees, Employee{
+		Id:        employee.Id,
+		FirstName: employee.FirstName,
+		LastName:  employee.LastName,
+	})
+	json.NewEncoder(w).Encode(employees)
+
+}
+
+```
