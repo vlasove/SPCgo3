@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+    </head>
+    <body>
+        <h1>Current Employees list</h1>
+        {{ range .employees }}
+            <h2>Employee ID: {{ .Id}}</h2>
+            <p>First Name : {{ .FirstName}}</p>
+            <p>Last Name : {{ .LastName}}</p>
+            <br>
+        {{ end }}
+    </body>
+</html>

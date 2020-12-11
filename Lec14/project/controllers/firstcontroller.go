@@ -29,3 +29,8 @@ func (this *FirstController) GetEmployees() {
 	this.Data["json"] = employees
 	this.ServeJSON()
 }
+
+func (this *FirstController) GetDashboard() {
+	this.Data["employees"] = employees
+	this.TplName = "dashboard.html"
+}
