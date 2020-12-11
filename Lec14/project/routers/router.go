@@ -13,4 +13,11 @@ func init() {
 		"get:GetEmployees")
 	beego.Router("/dashboard", &controllers.FirstController{},
 		"get:GetDashboard")
+
+	beego.Router("/home", &controllers.SessionController{},
+		"get:HomeAfterLogin")
+	beego.Router("/login", &controllers.SessionController{},
+		"get:Login")
+	beego.Router("/logout", &controllers.SessionController{},
+		"get:Logout")
 }
