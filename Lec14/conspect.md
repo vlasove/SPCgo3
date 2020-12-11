@@ -272,4 +272,25 @@ SessionProviderConfig = "127.0.0.1:6379"
 Создадим простейший фильтр, выполняющий роль логгера. На фильтре будет лежать следующая задача:
 * Фильтр будет считывать ```IP``` адрес ,а также в какое время (локальное) произошел тот или иной запрос
 
-***Фильтр*** - 
+***Фильтр*** - функционал, позволяющий выполнять действия ***ДО*** осуществления прямого запроса и ***ПОСЛЕ*** него.
+
+Определим пакет ```filters``` внутри которого создадим ```simplefilter.go```
+```
+package filters
+
+import (
+	"fmt"
+	"time"
+
+	context "github.com/astaxie/beego/server/web/context"
+)
+
+var LogManager = func(ctx *context.Context) {
+	fmt.Println("IP :: " + ctx.Request.RemoteAddr + ", Time :: " + time.Now().Format(time.RFC850))
+}
+
+```
+
+В ```router.go``` подключим наш фильтр:
+```
+```

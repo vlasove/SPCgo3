@@ -2,6 +2,7 @@ package routers
 
 import (
 	"project/controllers"
+	"project/filters"
 
 	beego "github.com/astaxie/beego/server/web"
 )
@@ -20,4 +21,5 @@ func init() {
 		"get:Login")
 	beego.Router("/logout", &controllers.SessionController{},
 		"get:Logout")
+	beego.InsertFilter("/*", beego.BeforeRouter, filters.LogManager)
 }
